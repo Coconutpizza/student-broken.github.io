@@ -404,25 +404,43 @@
         function calculateAverages() {
             const units = getUnits();
             const niveau = (jdlmData.settings || {}).niveau;
+            
             let allTermAverages = {};
             let allSubjectAverages = {};
+            
             ['etape1', 'etape2', 'etape3'].forEach(etape => {
                 if (!jdlmData[etape]) return;
+                
                 let termWeightedSum = 0;
                 let termUnitSum = 0;
-                allSubjectAverages[etape] = {};
+                allSubjectAverages[etape] = {}; // Initialize the object for the term
+                
                 jdlmData[etape].forEach(subject => {
+                    // Calculate the average for this specific subject
                     const average = calculateSubjectAverage(subject);
-                    const codePrefix = subject.code.substring(0,3);
-                    allSubjectAverages[etape][codePrefix] = { name: subjectList[codePrefix] || subject.name, average: average };
-                    const unit = units[codePrefix] || (mode === 'perso' ? 1 : null);
+                    
+                    // THIS IS THE KEY FIX: Reliably get the 3-letter prefix
+                    const codePrefix = subject.code.substring(0, 3);
+                    
+                    // Use the full subject code as a unique key to prevent overwriting
+                    allSubjectAverages[etape][subject.code] = { 
+                        name: subjectList[codePrefix] || subject.name, 
+                        average: average 
+                    };
+                    
+                    // Look up the unit using the 3-letter prefix
+                    const unit = units[codePrefix] || (jdlmData.settings?.unitesMode === 'perso' ? 1 : null);
+
+                    // Only include in term/global average if all data is valid
                     if (average !== null && unit !== null && niveau) {
                         termWeightedSum += average * unit;
                         termUnitSum += unit;
                     }
                 });
+                
                 allTermAverages[etape] = termUnitSum > 0 ? termWeightedSum / termUnitSum : null;
             });
+            
             let globalWeightedSum = 0;
             let globalTermCount = 0;
             Object.values(allTermAverages).forEach(avg => {
@@ -431,6 +449,7 @@
                     globalTermCount++;
                 }
             });
+
             return {
                 subjectAverages: allSubjectAverages,
                 termAverages: allTermAverages,
