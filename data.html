@@ -96,6 +96,78 @@
             outline: none;
         }
         
+        .sharing-section {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .sharing-section h4 {
+            margin-top: 0;
+            color: var(--secondary-color);
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .checkbox-container label {
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+        
+        .display-name-input {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .display-name-input.active {
+            display: block;
+        }
+        
+        .display-name-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .display-name-input input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 0.95em;
+        }
+        
+        .display-name-input input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+            outline: none;
+        }
+        
+        .sharing-note {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
         .terms-acceptance {
             font-size: 0.85em;
             text-align: center;
@@ -220,10 +292,9 @@
             padding-left: 10px;
         }
 
-        /* NOUVEAU STYLE POUR LE MESSAGE IMPORTANT */
         .important-message {
-            background-color: #fceae9; /* Fond rouge pâle */
-            color: var(--danger-color); /* Texte rouge */
+            background-color: #fceae9;
+            color: var(--danger-color);
             border: 1px solid var(--danger-color);
             padding: 15px;
             border-radius: 8px;
@@ -238,7 +309,6 @@
             margin-right: 10px;
             line-height: 1;
         }
-        /* FIN NOUVEAU STYLE */
 
         footer {
             text-align: center;
@@ -248,6 +318,27 @@
             font-style: italic;
             border-top: 1px solid #eee;
             margin-top: auto;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
         }
     </style>
 </head>
@@ -263,13 +354,31 @@
 
     <main class="content">
         <div class="data-widget">
+            <div id="status-message" class="status-message"></div>
+            
             <form id="data-form">
                 <textarea id="raw-text" placeholder="Collez les données du portail ici... 
-                    (Appuyez sur le bouton Aide pour un tutoriel)"></textarea>
+(Appuyez sur le bouton Aide pour un tutoriel)"></textarea>
                 
-                <!-- Texte d'acceptation implicite -->
+                <div class="sharing-section">
+                    <h4>📊 Partager au Classement</h4>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="share-checkbox" checked>
+                        <label for="share-checkbox">Partager ma moyenne de manière anonyme au classement</label>
+                    </div>
+                    
+                    <div class="display-name-input active" id="display-name-section">
+                        <label for="display-name">Nom d'affichage (optionnel):</label>
+                        <input type="text" id="display-name" placeholder="Ex: Étudiant123" maxlength="30">
+                    </div>
+                    
+                    <div class="sharing-note">
+                        ℹ️ Vos moyennes seront partagées de façon anonyme. Seul votre nom d'affichage sera visible.
+                    </div>
+                </div>
+                
                 <p class="terms-acceptance">
-                    En cliquant sur "Enregistrer et continuer", vous acceptez les <a href="conditions.html" target="_blank">Conditions d’utilisation</a> et la <a href="confidentialite.html" target="_blank">Politique de confidentialité</a>.
+                    En cliquant sur "Enregistrer et continuer", vous acceptez les <a href="conditions.html" target="_blank">Conditions d'utilisation</a> et la <a href="confidentialite.html" target="_blank">Politique de confidentialité</a>.
                 </p>
 
                 <button type="submit" id="submit-btn" class="btn" disabled>Enregistrer et continuer</button>
@@ -278,31 +387,42 @@
     </main>
     
     <div class="modal-overlay" id="tutorial-modal">
-    <div class="modal-content">
-        <span class="modal-close" id="close-modal-btn">&times;</span>
-        <h3>Comment utiliser l'outil</h3>
-        
-        <!-- Message important et reformulé -->
-        <div class="important-message">
-            <span class="icon">⚠</span>
-            <span>
-                <strong>Important!</strong> Pour avoir des informations à jour, vous devez refaire les étapes 1 à 5 souvent.
-            </span>
+        <div class="modal-content">
+            <span class="modal-close" id="close-modal-btn">&times;</span>
+            <h3>Comment utiliser l'outil</h3>
+            
+            <div class="important-message">
+                <span class="icon">⚠</span>
+                <span>
+                    <strong>Important!</strong> Pour avoir des informations à jour, vous devez refaire les étapes 1 à 5 souvent.
+                </span>
+            </div>
+            
+            <p>1. Allez dans la section "Travaux" du portail.</p>
+            <p>2. Faites les touches <strong>CTRL + A</strong> pour tout sélectionner.</p>
+            <p>3. Faites <strong>CTRL + C</strong> pour copier la sélection.</p>
+            <p>4. Collez le texte dans la zone ci-dessus avec <strong>CTRL + V</strong>.</p>
+            <p>5. Cliquez sur <strong>Enregistrer et continuer</strong>.</p>
+            <p>6. <strong>Répétez les étapes 1 à 5</strong> pour chaque étape (2e, 3e).</p>
         </div>
-        
-        <p>1. Allez dans la section "Travaux" du portail.</p>
-        <p>2. Faites les touches <strong>CTRL + A</strong> pour tout sélectionner.</p>
-        <p>3. Faites <strong>CTRL + C</strong> pour copier la sélection.</p>
-        <p>4. Collez le texte dans la zone ci-dessus avec <strong>CTRL + V</strong>.</p>
-        <p>5. Cliquez sur <strong>Enregistrer et continuer</strong>.</p>
-        <p>6. <strong>Répétez les étapes 1 à 5</strong> pour chaque étape (2e, 3e).</p>
     </div>
-</div>
 
-<footer>*jauge de la moyenne</footer>
+    <footer>*jauge de la moyenne</footer>
                 
 
     <script>
+        const gradeMap = {
+            'A+': {min: 95, max: 100}, 'A': {min: 90, max: 94}, 'A-': {min: 85, max: 89},
+            'B+': {min: 80, max: 84}, 'B': {min: 75, max: 79}, 'B-': {min: 70, max: 74},
+            'C+': {min: 65, max: 69}, 'C': {min: 62, max: 64}, 'C-': {min: 60, max: 61},
+            'D+': {min: 55, max: 59}, 'D': {min: 50, max: 54}, 'E': {min: 0, max: 49}
+        };
+
+        const defaultUnits = {
+            sec4: { 'ART': 2, 'MUS': 2, 'DRM': 2, 'FRA': 6, 'ELA': 4, 'EESL': 6, 'ESL': 4, 'MAT': 6, 'CST': 6, 'ST': 4, 'STE': 4, 'HQC': 4, 'CCQ': 2, 'EPS': 2, 'ENT': 2, 'INF': 2, 'PSY': 2 },
+            sec5: { 'ART': 2, 'MUS': 2, 'DRM': 2, 'CAT': 4, 'FRA': 6, 'ELA': 6, 'EESL': 6, 'ESL': 4, 'MAT': 6, 'CST': 4, 'MED': 4, 'PSY': 4, 'ENT': 4, 'FIN': 4, 'CHI': 4, 'PHY': 4, 'MON': 2, 'HQC': 4, 'CCQ': 2, 'EPS': 2 }
+        };
+
         const openModalBtn = document.getElementById('open-modal-btn');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const tutorialModal = document.getElementById('tutorial-modal');
@@ -315,9 +435,26 @@
         tutorialModal.addEventListener('click', (e) => { if (e.target === tutorialModal) closeModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
+        const shareCheckbox = document.getElementById('share-checkbox');
+        const displayNameSection = document.getElementById('display-name-section');
+        const displayNameInput = document.getElementById('display-name');
+        
+        shareCheckbox.addEventListener('change', () => {
+            displayNameSection.classList.toggle('active', shareCheckbox.checked);
+        });
+
         const submitBtn = document.getElementById('submit-btn');
         const dataForm = document.getElementById('data-form');
         const rawTextArea = document.getElementById('raw-text');
+        const statusMessage = document.getElementById('status-message');
+
+        function showStatus(message, isError = false) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + (isError ? 'error' : 'success');
+            setTimeout(() => {
+                statusMessage.className = 'status-message';
+            }, 5000);
+        }
 
         const checkTextarea = () => {
             submitBtn.disabled = rawTextArea.value.trim().length === 0;
@@ -326,24 +463,189 @@
         checkTextarea();
         rawTextArea.addEventListener('input', checkTextarea);
 
-        dataForm.addEventListener('submit', (e) => {
+        dataForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const rawText = rawTextArea.value;
             if (!rawText.trim()) {
-                alert("Veuillez coller des données avant d'enregistrer.");
+                showStatus("Veuillez coller des données avant d'enregistrer.", true);
                 return;
             }
             
-            const parsedResult = parsePortalData(rawText);
-            if (!parsedResult.nom || !parsedResult.etapeData) {
-                alert("Erreur lors de l'analyse des données. Le nom ou le numéro d'étape n'a pas pu être trouvé. Vérifiez le texte collé.");
-                return;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enregistrement...';
+            
+            try {
+                const parsedResult = parsePortalData(rawText);
+                if (!parsedResult.nom || !parsedResult.etapeData) {
+                    showStatus("Erreur lors de l'analyse des données. Le nom ou le numéro d'étape n'a pas pu être trouvé.", true);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Enregistrer et continuer';
+                    return;
+                }
+                
+                const existingData = JSON.parse(localStorage.getItem('jdlmData')) || {};
+                
+                if (!existingData.userId) {
+                    existingData.userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                }
+                
+                const updatedData = { 
+                    ...existingData, 
+                    nom: parsedResult.nom, 
+                    [parsedResult.etapeKey]: parsedResult.etapeData,
+                    shareToLeaderboard: shareCheckbox.checked,
+                    displayName: displayNameInput.value.trim() || parsedResult.nom
+                };
+                
+                localStorage.setItem('jdlmData', JSON.stringify(updatedData));
+                
+                if (shareCheckbox.checked) {
+                    await updateLeaderboard(updatedData);
+                    showStatus('Données enregistrées et partagées au classement!');
+                } else {
+                    showStatus('Données enregistrées localement!');
+                }
+                
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showStatus('Erreur lors de l\'enregistrement: ' + error.message, true);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enregistrer et continuer';
             }
-            const existingData = JSON.parse(localStorage.getItem('jdlmData')) || {};
-            const updatedData = { ...existingData, nom: parsedResult.nom, [parsedResult.etapeKey]: parsedResult.etapeData };
-            localStorage.setItem('jdlmData', JSON.stringify(updatedData));
-            window.location.href = 'main.html';
         });
+
+        async function updateLeaderboard(userData) {
+            try {
+                const averages = calculateAverages(userData);
+                
+                const leaderboardEntry = {
+                    userId: userData.userId,
+                    displayName: userData.displayName,
+                    niveau: userData.settings?.niveau || 'unknown',
+                    globalAverage: averages.globalAverage,
+                    termAverages: averages.termAverages,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                await window.storage.set(
+                    `leaderboard:${userData.userId}`,
+                    JSON.stringify(leaderboardEntry),
+                    true
+                );
+                
+                console.log('Leaderboard updated successfully');
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+                throw error;
+            }
+        }
+
+        function getNumericGrade(result) {
+            if (!result) return null;
+            const trimmedResult = result.trim();
+            if (gradeMap[trimmedResult]) {
+                const { min, max } = gradeMap[trimmedResult];
+                return (min + max) / 2;
+            }
+            const scoreMatch = trimmedResult.match(/(\d+[,.]?\d*)\s*\/\s*(\d+[,.]?\d*)/);
+            if (scoreMatch) {
+                const score = parseFloat(scoreMatch[1].replace(',', '.'));
+                const maxScore = parseFloat(scoreMatch[2].replace(',', '.'));
+                if (!isNaN(score) && !isNaN(maxScore) && maxScore > 0) {
+                    return (score / maxScore) * 100;
+                }
+            }
+            return null;
+        }
+
+        function calculateSubjectAverage(subject) {
+            let totalWeightedGrade = 0;
+            let totalCompetencyWeight = 0;
+            subject.competencies.forEach(comp => {
+                const compWeightMatch = comp.name.match(/\((\d+)%\)/);
+                if (!compWeightMatch) return;
+                const compWeight = parseFloat(compWeightMatch[1]);
+                let totalAssignmentGrade = 0;
+                let totalAssignmentWeight = 0;
+                comp.assignments.forEach(assign => {
+                    const grade = getNumericGrade(assign.result);
+                    const weight = parseFloat(assign.pond);
+                    if (grade !== null && !isNaN(weight)) {
+                        totalAssignmentGrade += grade * weight;
+                        totalAssignmentWeight += weight;
+                    }
+                });
+                if (totalAssignmentWeight > 0) {
+                    const competencyAverage = totalAssignmentGrade / totalAssignmentWeight;
+                    totalWeightedGrade += competencyAverage * compWeight;
+                    totalCompetencyWeight += compWeight;
+                }
+            });
+            return totalCompetencyWeight > 0 ? totalWeightedGrade / totalCompetencyWeight : null;
+        }
+
+        function calculateAverages(jdlmData) {
+            const settings = jdlmData.settings || {};
+            const niveau = settings.niveau;
+            const mode = settings.unitesMode || 'defaut';
+            
+            let units = {};
+            if (mode === 'sans') {
+                units = new Proxy({}, { get: () => 1 });
+            } else if (mode === 'perso') {
+                units = settings.customUnites || {};
+            } else if (mode === 'defaut' && niveau && defaultUnits[niveau]) {
+                units = defaultUnits[niveau];
+            }
+            
+            let allTermAverages = {};
+            const defaultSubjectUnit = 2;
+            
+            ['etape1', 'etape2', 'etape3'].forEach(etape => {
+                if (!jdlmData[etape]) return;
+                let termWeightedSum = 0;
+                let termUnitSum = 0;
+                
+                jdlmData[etape].forEach(subject => {
+                    const average = calculateSubjectAverage(subject);
+                    const codePrefix = subject.code.substring(0,3);
+                    
+                    let unit;
+                    if (mode === 'defaut' && !niveau) {
+                        unit = null;
+                    } else if (mode === 'sans' || mode === 'perso') {
+                        unit = units[codePrefix] ?? 1;
+                    } else if (mode === 'defaut') {
+                        unit = units[codePrefix] ?? defaultSubjectUnit;
+                    }
+
+                    if (average !== null && unit !== null && niveau) {
+                        termWeightedSum += average * unit;
+                        termUnitSum += unit;
+                    }
+                });
+                
+                allTermAverages[etape] = termUnitSum > 0 ? termWeightedSum / termUnitSum : null;
+            });
+            
+            let globalWeightedSum = 0;
+            let globalTermCount = 0;
+            Object.values(allTermAverages).forEach(avg => {
+                if (avg !== null) {
+                    globalWeightedSum += avg;
+                    globalTermCount++;
+                }
+            });
+            
+            return {
+                termAverages: allTermAverages,
+                globalAverage: globalTermCount > 0 ? globalWeightedSum / globalTermCount : null
+            };
+        }
 
         function parsePortalData(text) {
             const nameMatch = text.match(/Photo\s*\n(.+)/);
