@@ -333,6 +333,8 @@
 </div>
 
 <script>
+const VERIFICATION_URL = "https://script.google.com/macros/s/AKfycbwNnr7yofbZsalVH9-V4TJRgSnaIT93Q6uNR7Gt-J7owpPdwmFMODisawKWqFL_Jbs3Pw/exec";
+
 const intro = document.getElementById("intro");
 const fadeOverlay = document.getElementById("fadeOverlay");
 const mainContent = document.getElementById("mainContent");
@@ -343,7 +345,7 @@ const linkvertiseLink = document.getElementById("linkvertiseLink");
 const countdownNumber = document.getElementById("countdownNumber");
 const closePopup = document.getElementById("closePopup");
 
-const PASSWORD = "moyenne";
+
 
 let animationCompleted = false;
 let popupInterval;
@@ -490,21 +492,51 @@ skipPromptArea.style.cssText = `
     font-family: sans-serif;
     z-index: 10000;
 `;
+
+
+// 🔑 NEW SECURE PASSWORD CHECK LOGIC 🔑
 skipPromptArea.textContent = "Skip Ad (Password Required)";
 intro.appendChild(skipPromptArea);
 
 skipPromptArea.addEventListener('click', () => {
+
     if (animationCompleted) return;
+    
 
     const enteredPassword = prompt("Enter the password to skip the ad:");
 
-    if (enteredPassword === PASSWORD) {
-        endIntroSequence();
+    if (enteredPassword) { // Check if the user entered something
+        // 1. Construct the URL to your Apps Script endpoint
+        const fullUrl = `${VERIFICATION_URL}?password=${encodeURIComponent(enteredPassword)}`;
+
+        // 2. Fetch the response from the secure endpoint
+        fetch(fullUrl)
+        .then(response => {
+             if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 3. Check the success flag returned from the Apps Script
+            if (data.success) { 
+                endIntroSequence();
+            } else {
+                alert("Incorrect password. Keep watching.");
+            }
+        })
+        .catch(error => {
+            console.error('Verification failed or network error:', error);
+            alert("Error connecting to the password service. Please check your connection.");
+        });
     } else if (enteredPassword !== null) {
-        alert("Incorrect password. Keep watching.");
+         // If prompt was cancelled, do nothing. If empty, give an error.
+         alert("Please enter a password.");
     }
 });
 </script>
 
 </body>
 </html>
+
+
