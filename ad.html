@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   
@@ -357,31 +356,23 @@ const VIDEO_IDS = [
     "AD_PLACEHOLDER",
     "7ikBMD5UAQg",
     "AD_PLACEHOLDER",
-// Premium access ad
 ];
 let currentVideoIndex = 0;
-const ROTATION_INTERVAL = 10000; // Rotate every 15 seconds
+const ROTATION_INTERVAL = 10000;
 let rotationTimer;
 
-/**
-loop mute and other stuff
- */
 function getEmbedUrl(videoId) {
     return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0`;
 }
-
 
 function changeVideo() {
     currentVideoIndex = (currentVideoIndex + 1) % VIDEO_IDS.length;
     const nextVideoId = VIDEO_IDS[currentVideoIndex];
     
     if (nextVideoId === "AD_PLACEHOLDER") {
-        // Show custom ad slide
         adVideo.style.display = "none";
         adPlaceholder.style.display = "flex";
-
     } else {
-        // Show YouTube video
         adVideo.style.display = "block";
         adPlaceholder.style.display = "none";
         adVideo.src = getEmbedUrl(nextVideoId);
@@ -400,19 +391,21 @@ if (adVideo) {
     rotationTimer = setInterval(changeVideo, ROTATION_INTERVAL);
 }
 
-
-
-
 function endIntroSequence() {
     if (animationCompleted) return;
     animationCompleted = true;
 
-    // 1. STOP VIDEO ROTATION
+    // STOP VIDEO ROTATION
     if (rotationTimer) {
         clearInterval(rotationTimer);
     }
 
-    // 2. Stop the video
+    // STOP POPUP INTERVAL
+    if (popupInterval) {
+        clearInterval(popupInterval);
+    }
+
+    // Stop the video
     if (adVideo) {
         adVideo.src = "";
     }
@@ -421,7 +414,7 @@ function endIntroSequence() {
 
     setTimeout(() => {
         intro.style.opacity = 0;
-        window.parent.postMessage('closeAd', '*');  // ADD THIS LINE
+        window.parent.postMessage('closeAd', '*');
         mainContent.style.opacity = 1;
         document.body.style.overflow = "auto";
         setTimeout(() => {
@@ -432,7 +425,6 @@ function endIntroSequence() {
 
 // Linkvertise Popup Logic
 function showLinkvertisePopup() {
-    // Reset the link state each time popup shows
     linkvertiseLink.classList.remove("active");
     linkvertiseLink.style.cursor = "not-allowed";
     
@@ -448,7 +440,6 @@ function showLinkvertisePopup() {
         
         if (countdown <= 0) {
             clearInterval(countdownInterval);
-            // Make link clickable
             linkvertiseLink.classList.add("active");
             linkvertiseLink.style.cursor = "pointer";
             document.getElementById("countdown").textContent = "Link is now active!";
@@ -457,7 +448,6 @@ function showLinkvertisePopup() {
         }
     }, 1000);
     
-    // Prevent clicking before countdown ends
     linkvertiseLink.onclick = (e) => {
         if (!linkvertiseLink.classList.contains('active')) {
             e.preventDefault();
@@ -471,22 +461,21 @@ function closePopupFunc() {
     linkvertisePopup.classList.remove("show");
 }
 
-// Close button handler
 closePopup.addEventListener('click', closePopupFunc);
 
 // Show popup 5 seconds after page load
 setTimeout(() => {
     showLinkvertisePopup();
-}, 5000); // Show after 5 seconds
+}, 5000);
 
 // Show popup every 60 seconds
 popupInterval = setInterval(() => {
     if (!animationCompleted) {
         showLinkvertisePopup();
     }
-}, 60000); // Every 60 seconds
+}, 60000);
 
-// Skip Ad 
+// Skip Ad
 const skipPromptArea = document.createElement("div");
 skipPromptArea.id = "skipPromptArea";
 skipPromptArea.style.cssText = `
@@ -504,7 +493,6 @@ skipPromptArea.style.cssText = `
 skipPromptArea.textContent = "Skip Ad (Password Required)";
 intro.appendChild(skipPromptArea);
 
-
 skipPromptArea.addEventListener('click', () => {
     if (animationCompleted) return;
 
@@ -519,5 +507,4 @@ skipPromptArea.addEventListener('click', () => {
 </script>
 
 </body>
-  
 </html>
