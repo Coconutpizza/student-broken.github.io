@@ -198,6 +198,13 @@
 </head>
 <body>
 
+    <!-- AD OVERLAY - ADD THIS -->
+    <div id="ad-overlay-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; background: white;">
+        <iframe src="ad.html" id="ad-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+    <!-- END AD OVERLAY -->
+
+
     <a href="index.html" class="logout-arrow">←</a>
     <header class="site-header">Outil JDLM*</header>
 
@@ -625,7 +632,17 @@
             });
             return table;
         }
-
+// Listen for message from ad.html to close the overlay
+window.addEventListener('message', function(event) {
+    if (event.data === 'closeAd') {
+        const adOverlay = document.getElementById('ad-overlay-container');
+        adOverlay.style.transition = 'opacity 1s ease';
+        adOverlay.style.opacity = '0';
+        setTimeout(() => {
+            adOverlay.remove();
+        }, 1000);
+    }
+});
     </script>
 </body>
 </html>
