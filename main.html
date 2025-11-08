@@ -413,25 +413,23 @@
                 
                 let termWeightedSum = 0;
                 let termUnitSum = 0;
-                allSubjectAverages[etape] = {}; // Initialize the object for the term
+                allSubjectAverages[etape] = {};
                 
                 jdlmData[etape].forEach(subject => {
-                    // Calculate the average for this specific subject
                     const average = calculateSubjectAverage(subject);
-                    
-                    // THIS IS THE KEY FIX: Reliably get the 3-letter prefix
                     const codePrefix = subject.code.substring(0, 3);
                     
-                    // Use the full subject code as a unique key to prevent overwriting
                     allSubjectAverages[etape][subject.code] = { 
                         name: subjectList[codePrefix] || subject.name, 
                         average: average 
                     };
                     
-                    // Look up the unit using the 3-letter prefix
-                    const unit = units[codePrefix] || (jdlmData.settings?.unitesMode === 'perso' ? 1 : null);
+                    let unit = units[codePrefix];
+                    if (unit === undefined) {
+    
+                        unit = (jdlmData.settings?.unitesMode === 'perso') ? 1 : null;
+                    }
 
-                    // Only include in term/global average if all data is valid
                     if (average !== null && unit !== null && niveau) {
                         termWeightedSum += average * unit;
                         termUnitSum += unit;
@@ -468,18 +466,23 @@
             renderTermData(jdlmData.etape3, document.getElementById('etape3'));
         }
         
-        function renderSidePanel() {
+       function renderSidePanel() {
             const averages = calculateAverages();
             const niveau = (jdlmData.settings || {}).niveau;
             const globalAvgEl = document.getElementById('moyenne-generale');
             const termAvgEl = document.getElementById('moyenne-etape');
+            
             globalAvgEl.classList.toggle('invalid', !niveau);
             termAvgEl.classList.toggle('invalid', !niveau);
+            
             globalAvgEl.textContent = !niveau ? 'N/A' : (averages.globalAverage !== null ? averages.globalAverage.toFixed(2) + '%' : '--');
             termAvgEl.textContent = !niveau ? 'N/A' : (averages.termAverages[activeTab] !== null ? averages.termAverages[activeTab].toFixed(2) + '%' : '--');
+            
             const subjectListEl = document.getElementById('subject-averages-list');
             subjectListEl.innerHTML = '';
+            
             const activeTermSubjects = averages.subjectAverages[activeTab];
+            
             if (activeTermSubjects && Object.keys(activeTermSubjects).length > 0) {
                 Object.values(activeTermSubjects).forEach(subj => {
                     const li = document.createElement('li');
