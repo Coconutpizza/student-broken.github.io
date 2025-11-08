@@ -298,7 +298,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             jdlmData = JSON.parse(localStorage.getItem('jdlmData')) || {};
             if (!jdlmData.nom) {
-                document.getElementById('tab-contents').innerHTML = "<p>Aucune donnée disponible. Veuillez ajouter les données.</p>";
+                document.getElementById('tab-contents').innerHTML = "<p>Aucune donnée disponible. Veuillez ajouter les données. </p>";
                 return;
             }
             loadSettings();
