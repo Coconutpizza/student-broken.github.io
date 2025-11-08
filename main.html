@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - Outil JDLM</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f4f7f6;
+            --widget-background: #ffffff;
+            --text-color: #333;
+            --light-grey: #bdc3c7;
+            --footer-grey: #7f8c8d;
+        }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .site-header {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--secondary-color);
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .data-section {
+            flex: 3;
+            padding-right: 20px;
+        }
+        .actions-section {
+            flex: 1;
+            position: sticky;
+            top: 20px;
+            height: 100vh;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: bold;
+            color: var(--light-grey);
+            position: relative;
+        }
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            background-color: var(--secondary-color);
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #212f3c;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.8em;
+            color: var(--footer-grey);
+            font-style: italic;
+        }
+        .subject-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: var(--widget-background);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .subject-table th, .subject-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+        .subject-table th {
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 14px;
+        }
+        .subject-table td { font-size: 13px; }
+        .subject-table tr:last-child td { border-bottom: none; }
+        .competency-row td {
+            background-color: #eaf2f8;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-style: italic;
+        }
+        .no-data { color: var(--light-grey); }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">Outil JDLM*</header>
+
+    <main class="main-container">
+        <section class="data-section">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="etape1">Étape 1</button>
+                <button class="tab-btn" data-tab="etape2">Étape 2</button>
+                <button class="tab-btn" data-tab="etape3">Étape 3</button>
+            </div>
+            <div id="tab-contents">
+                <div id="etape1" class="tab-content active"></div>
+                <div id="etape2" class="tab-content"></div>
+                <div id="etape3" class="tab-content"></div>
+            </div>
+        </section>
+
+        <aside class="actions-section">
+            <a href="data.html" class="btn">Ajouter des données</a>
+        </aside>
+    </main>
+
+    <footer>*jauge de la moyenne</footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const jdlmData = JSON.parse(localStorage.getItem('jdlmData'));
+
+            if (!jdlmData) {
+                document.getElementById('tab-contents').innerHTML = "<p>Aucune donnée disponible. Veuillez ajouter les données.</p>";
+                return;
+            }
+
+            renderTermData(jdlmData.etape1, document.getElementById('etape1'));
+            renderTermData(jdlmData.etape2, document.getElementById('etape2'));
+            renderTermData(jdlmData.etape3, document.getElementById('etape3'));
+
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const target = document.getElementById(tab.dataset.tab);
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    target.classList.add('active');
+                });
+            });
+        });
+
+        function renderTermData(termData, container) {
+            if (!termData || termData.length === 0) {
+                container.innerHTML = '<p class="no-data">Aucune donnée pour cette étape.</p>';
+                return;
+            }
+
+            termData.forEach(subject => {
+                container.appendChild(renderSubjectTable(subject));
+            });
+        }
+
+        function getGradePercentage(grade) {
+            const gradeMap = {
+                'A+': '97-100%', 'A': '93-96%', 'A-': '90-92%', 'B+': '87-89%', 'B': '83-86%', 'B-': '80-82%', 'C+': '77-79%', 'C': '73-76%', 'C-': '70-72%', 'D+': '67-69%', 'D': '63-66%', 'D-': '60-62%', 'E': '50-59%', 'F': '<50%'
+            };
+            const trimmedGrade = grade.trim();
+            const gradeRegex = /^[A-DF][+-]?$/;
+            if (gradeRegex.test(trimmedGrade)) {
+                return `${trimmedGrade} (~${gradeMap[trimmedGrade]})`;
+            }
+            return grade;
+        }
+
+        function renderSubjectTable(subject) {
+            const table = document.createElement('table');
+            table.className = 'subject-table';
+            table.innerHTML = `<thead>
+                <tr><th colspan="7">${subject.code} - ${subject.name}</th></tr>
+                <tr><th>Catégorie</th><th>Travail</th><th>Pond.</th><th>Date assignée</th><th>Date due</th><th>Date complétée</th><th>Résultat</th></tr>
+            </thead>
+            <tbody></tbody>`;
+            
+            const tbody = table.querySelector('tbody');
+            subject.competencies.forEach(comp => {
+                const compRow = document.createElement('tr');
+                compRow.className = 'competency-row';
+                compRow.innerHTML = `<td colspan="7">${comp.name}</td>`;
+                tbody.appendChild(compRow);
+
+                comp.assignments.forEach(assign => {
+                    const assignRow = document.createElement('tr');
+                    const formattedResult = assign.result ? getGradePercentage(assign.result) : '<span class="no-data">-</span>';
+                    assignRow.innerHTML = `
+                        <td>${assign.category || '<span class="no-data">-</span>'}</td>
+                        <td>${assign.work || '<span class="no-data">-</span>'}</td>
+                        <td>${assign.pond || '<span class="no-data">-</span>'}</td>
+                        <td>${assign.assignedDate || '<span class="no-data">-</span>'}</td>
+                        <td>${assign.dueDate.replace('à','') || '<span class="no-data">-</span>'}</td>
+                        <td>${assign.completedDate || '<span class="no-data">-</span>'}</td>
+                        <td>${formattedResult}</td>`;
+                    tbody.appendChild(assignRow);
+                });
+            });
+            return table;
+        }
+    </script>
+</body>
+</html>
