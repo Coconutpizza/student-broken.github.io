@@ -6,6 +6,11 @@
     <title>Classement - Outil JDLM</title>
     <link rel="icon" href="https://raw.githubusercontent.com/Student-broken/student-broken.github.io/refs/heads/main/favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
         :root {
             --primary-color: #2980b9;
@@ -251,21 +256,30 @@
     <footer>*jauge de la moyenne</footer>
 
     <script>
-        const gradeMap = {
-            'A+': {min: 95, max: 100}, 'A': {min: 90, max: 94}, 'A-': {min: 85, max: 89},
-            'B+': {min: 80, max: 84}, 'B': {min: 75, max: 79}, 'B-': {min: 70, max: 74},
-            'C+': {min: 65, max: 69}, 'C': {min: 62, max: 64}, 'C-': {min: 60, max: 61},
-            'D+': {min: 55, max: 59}, 'D': {min: 50, max: 54}, 'E': {min: 0, max: 49}
+        // ========================================
+        // FIREBASE CONFIGURATION
+        // ========================================
+        // REPLACE THIS with your Firebase config!
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        const defaultUnits = {
-            sec4: { 'ART': 2, 'MUS': 2, 'DRM': 2, 'FRA': 6, 'ELA': 4, 'EESL': 6, 'ESL': 4, 'MAT': 6, 'CST': 6, 'ST': 4, 'STE': 4, 'HQC': 4, 'CCQ': 2, 'EPS': 2, 'ENT': 2, 'INF': 2, 'PSY': 2 },
-            sec5: { 'ART': 2, 'MUS': 2, 'DRM': 2, 'CAT': 4, 'FRA': 6, 'ELA': 6, 'EESL': 6, 'ESL': 4, 'MAT': 6, 'CST': 4, 'MED': 4, 'PSY': 4, 'ENT': 4, 'FIN': 4, 'CHI': 4, 'PHY': 4, 'MON': 2, 'HQC': 4, 'CCQ': 2, 'EPS': 2 }
-        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
         let currentUserData = null;
         let allLeaderboardData = [];
 
+        // ========================================
+        // LOAD DATA ON PAGE LOAD
+        // ========================================
         document.addEventListener('DOMContentLoaded', async () => {
             currentUserData = JSON.parse(localStorage.getItem('jdlmData')) || null;
             
@@ -275,28 +289,20 @@
             await loadLeaderboardData();
         });
 
+        // ========================================
+        // LOAD LEADERBOARD FROM FIREBASE
+        // ========================================
         async function loadLeaderboardData() {
             try {
-                const result = await window.storage.list('leaderboard:', true);
+                const snapshot = await database.ref('leaderboard').once('value');
+                const data = snapshot.val();
                 
-                if (!result || !result.keys || result.keys.length === 0) {
+                if (!data) {
                     document.getElementById('leaderboard-content').innerHTML = '<div class="no-data">Aucune donnée de classement disponible.</div>';
                     return;
                 }
 
-                allLeaderboardData = [];
-                for (const key of result.keys) {
-                    try {
-                        const entryResult = await window.storage.get(key, true);
-                        if (entryResult && entryResult.value) {
-                            const data = JSON.parse(entryResult.value);
-                            allLeaderboardData.push(data);
-                        }
-                    } catch (err) {
-                        console.error(`Error loading entry ${key}:`, err);
-                    }
-                }
-
+                allLeaderboardData = Object.values(data);
                 renderLeaderboard();
             } catch (error) {
                 console.error('Error loading leaderboard:', error);
@@ -304,6 +310,9 @@
             }
         }
 
+        // ========================================
+        // RENDER LEADERBOARD
+        // ========================================
         function renderLeaderboard() {
             const niveauFilter = document.getElementById('filter-niveau').value;
             const etapeFilter = document.getElementById('filter-etape').value;
@@ -329,6 +338,9 @@
             renderTable(filteredData);
         }
 
+        // ========================================
+        // RENDER STATISTICS
+        // ========================================
         function renderStats(data) {
             const totalParticipants = data.length;
             const globalAverage = totalParticipants > 0 
@@ -348,6 +360,9 @@
             document.getElementById('user-rank').textContent = userRank !== '--' ? `#${userRank}` : '--';
         }
 
+        // ========================================
+        // RENDER TABLE
+        // ========================================
         function renderTable(data) {
             const container = document.getElementById('leaderboard-content');
 
