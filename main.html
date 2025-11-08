@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de Bord - Outil JDLM</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #3498db;
@@ -20,27 +21,33 @@
         }
         body {
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Montserrat', sans-serif; /* Premium Font */
             background-color: var(--background-color);
             color: var(--text-color);
         }
         .site-header {
             text-align: center;
-            padding: 20px 0;
+            padding: 25px 0 15px 0;
             color: var(--secondary-color);
-            font-size: 1.5em;
-            font-weight: bold;
+            font-size: 2.2em; /* Bigger Title */
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background-color: var(--widget-background);
         }
         .main-container {
             display: flex;
             max-width: 1600px;
-            margin: 0 auto;
+            margin: 20px auto;
             padding: 0 20px;
             align-items: flex-start;
-            gap: 20px;
+            gap: 30px;
         }
         .data-section {
             flex: 3;
+            background-color: var(--widget-background);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
         .side-panel {
             flex: 1;
@@ -49,106 +56,57 @@
             background-color: var(--side-panel-color);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* More shadow */
         }
-        .moyenne-widgets {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+        .logout-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            line-height: 1;
         }
+        .logout-btn:hover {
+            color: var(--danger-color);
+            transform: scale(1.1);
+        }
+        .moyenne-widgets { display: flex; gap: 15px; margin-bottom: 20px; }
         .moyenne-widget {
             flex: 1;
             background-color: var(--widget-darker-color);
             border-radius: 8px;
             padding: 15px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .moyenne-widget h4 {
-            margin: 0 0 10px 0;
-            font-size: 0.9em;
-            color: var(--secondary-color);
-        }
-        .moyenne-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        .moyenne-value.invalid {
-            color: var(--danger-color);
-        }
-        .control-group {
-            margin-bottom: 20px;
-        }
-        .control-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-        .control-group select, .control-group .btn {
-            width: 100%;
-        }
-        select {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--light-grey);
-            background-color: white;
-        }
-        .subject-averages {
-            margin-top: 20px;
-        }
-        .subject-averages h4 {
-            margin-top: 0;
-            color: var(--secondary-color);
-            border-bottom: 1px solid var(--light-grey);
-            padding-bottom: 5px;
-        }
-        #subject-averages-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 0.9em;
-        }
-        #subject-averages-list li {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        #subject-averages-list li:last-child {
-            border-bottom: none;
-        }
+        .moyenne-widget h4 { margin: 0 0 10px 0; font-size: 0.9em; color: var(--secondary-color); }
+        .moyenne-value { font-size: 2em; font-weight: bold; color: var(--primary-color); }
+        .moyenne-value.invalid { color: var(--danger-color); }
+        .control-group { margin-bottom: 20px; }
+        .control-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        .control-group select, .control-group .btn { width: 100%; }
+        select { padding: 10px; border-radius: 8px; border: 1px solid var(--light-grey); background-color: white; }
+        .subject-averages { margin-top: 20px; }
+        .subject-averages h4 { margin-top: 0; color: var(--secondary-color); border-bottom: 1px solid var(--light-grey); padding-bottom: 5px; }
+        #subject-averages-list { list-style: none; padding: 0; margin: 0; font-size: 0.9em; }
+        #subject-averages-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+        #subject-averages-list li:last-child { border-bottom: none; }
+        #subject-averages-list strong { font-weight: 700; } /* Bold subject averages */
         .btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            color: white;
-            transition: background-color 0.2s, transform 0.2s;
-            text-align: center;
+            display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; text-decoration: none; color: white; transition: background-color 0.2s, transform 0.2s; text-align: center;
         }
-        .btn-main-action {
-            background-color: var(--secondary-color);
-            margin-top: 20px;
-        }
-        .btn-main-action:hover {
-            background-color: #212f3c;
-        }
-        .btn-control {
-            background-color: var(--primary-color);
-        }
+        .btn-main-action { background-color: var(--secondary-color); margin-top: 20px; }
+        .btn-main-action:hover { background-color: #212f3c; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .btn-control { background-color: var(--primary-color); }
         .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 1em; font-weight: bold; color: var(--light-grey); position: relative; }
         .tab-btn.active { color: var(--primary-color); }
         .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background-color: var(--primary-color); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .subject-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background: var(--widget-background); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        .subject-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background: var(--widget-background); border-radius: 8px; overflow: hidden; }
         .subject-table th, .subject-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: top; }
         .subject-table th { background-color: var(--secondary-color); color: white; font-size: 14px; }
         .subject-table td { font-size: 13px; }
@@ -172,6 +130,7 @@
 <body>
 
     <header class="site-header">Outil JDLM*</header>
+    <div class="logout-btn" onclick="logoutSession()">&#x2716;</div> <!-- Quit icon -->
 
     <main class="main-container">
         <section class="data-section">
@@ -260,9 +219,12 @@
         // FIN DE LA CONFIGURATION
         // ==================================================================
 
+        const SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 60 minutes
         let jdlmData, activeTab = 'etape1';
 
         document.addEventListener('DOMContentLoaded', () => {
+            if (!checkSession()) return; // Check and enforce session timeout
+
             jdlmData = JSON.parse(localStorage.getItem('jdlmData')) || {};
             if (!jdlmData.nom) {
                 document.getElementById('tab-contents').innerHTML = "<p>Aucune donnée disponible. Veuillez ajouter les données.</p>";
@@ -272,6 +234,32 @@
             setupEventListeners();
             renderAll();
         });
+        
+        function logoutSession() {
+            localStorage.removeItem('jdlmData'); // Clear all data
+            localStorage.removeItem('sessionStart');
+            window.location.href = 'login.html';
+        }
+
+        function checkSession() {
+            const sessionStart = localStorage.getItem('sessionStart');
+            const now = new Date().getTime();
+
+            if (!sessionStart) {
+                localStorage.setItem('sessionStart', now);
+                return true;
+            }
+
+            if (now - parseInt(sessionStart) > SESSION_TIMEOUT_MS) {
+                alert("Votre session a expiré (inactivité ou durée maximale atteinte). Veuillez vous reconnecter.");
+                logoutSession();
+                return false;
+            }
+
+            // Update session time to keep it alive
+            localStorage.setItem('sessionStart', now);
+            return true;
+        }
 
         function setupEventListeners() {
             document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -282,34 +270,41 @@
                     activeTab = tab.dataset.tab;
                     document.getElementById(activeTab).classList.add('active');
                     renderSidePanel();
+                    checkSession(); // Check session on every major user action
                 });
             });
             document.getElementById('niveau-secondaire').addEventListener('change', (e) => {
                 jdlmData.settings = { ...jdlmData.settings, niveau: e.target.value };
                 localStorage.setItem('jdlmData', JSON.stringify(jdlmData));
                 renderAll();
+                checkSession();
             });
             const unitesModal = document.getElementById('unites-modal');
             document.getElementById('unites-btn').addEventListener('click', () => {
                 populateUnitesModal();
                 unitesModal.classList.add('active');
+                checkSession();
             });
             document.getElementById('close-unites-modal').addEventListener('click', () => {
                 saveCustomUnits();
                 unitesModal.classList.remove('active');
                 renderAll();
+                checkSession();
             });
             unitesModal.addEventListener('click', (e) => {
                 if(e.target === unitesModal) {
                     saveCustomUnits();
                     unitesModal.classList.remove('active');
                     renderAll();
+                    checkSession();
                 }
             });
             document.getElementById('unites-mode').addEventListener('change', (e) => {
                 jdlmData.settings = { ...jdlmData.settings, unitesMode: e.target.value };
                 localStorage.setItem('jdlmData', JSON.stringify(jdlmData));
                 populateUnitesModal();
+                renderAll(); // Rerender to show updated subject averages
+                checkSession();
             });
         }
         
@@ -327,6 +322,7 @@
             });
             jdlmData.settings.customUnites = customUnites;
             localStorage.setItem('jdlmData', JSON.stringify(jdlmData));
+            // No renderAll here, it's called by the modal's close handler
         }
 
         function getNumericGrade(result) {
@@ -398,8 +394,7 @@
                     const codePrefix = subject.code.substring(0,3);
                     allSubjectAverages[etape][codePrefix] = { name: subjectList[codePrefix] || subject.name, average: average };
                     
-                    // --- CHANGE 1: Default unit weight is now 2 ---
-                    const unit = units[codePrefix] ?? (mode === 'perso' ? 1 : 2);
+                    const unit = units[codePrefix] ?? 2; // Default to 2 if not explicitly set anywhere
                     
                     if (average !== null && unit !== null && niveau) {
                         termWeightedSum += average * unit;
@@ -441,8 +436,8 @@
             const termAvgEl = document.getElementById('moyenne-etape');
             globalAvgEl.classList.toggle('invalid', !niveau);
             termAvgEl.classList.toggle('invalid', !niveau);
-            globalAvgEl.textContent = !niveau ? 'N/A' : (averages.globalAverage !== null ? averages.globalAverage.toFixed(2) + '%' : '--');
-            termAvgEl.textContent = !niveau ? 'N/A' : (averages.termAverages[activeTab] !== null ? averages.termAverages[activeTab].toFixed(2) + '%' : '--');
+            globalAvgEl.innerHTML = !niveau ? 'N/A' : (averages.globalAverage !== null ? `<strong>${averages.globalAverage.toFixed(2)}%</strong>` : '--');
+            termAvgEl.innerHTML = !niveau ? 'N/A' : (averages.termAverages[activeTab] !== null ? `<strong>${averages.termAverages[activeTab].toFixed(2)}%</strong>` : '--');
             const subjectListEl = document.getElementById('subject-averages-list');
             subjectListEl.innerHTML = '';
             const activeTermSubjects = averages.subjectAverages[activeTab];
@@ -482,7 +477,7 @@
                 item.className = 'unite-item';
                 let valueDisplay = '';
                 if (mode === 'perso') {
-                    const currentValue = (settings.customUnites || {})[code] || 1;
+                    const currentValue = (settings.customUnites || {})[code] || 2;
                     valueDisplay = `<input type="number" data-code="${code}" value="${currentValue}" min="0" step="1">`;
                 } else {
                     const units = getUnits();
@@ -522,12 +517,14 @@
                     const numGrade = getNumericGrade(assign.result);
                     let formattedResult = '<span class="no-data">-</span>';
                     if (assign.result) {
-                        // --- CHANGE 2: Only show estimation for letter grades ---
                         const isLetterGrade = !!gradeMap[assign.result.trim()];
+                        const hasPercentage = assign.result.includes('%');
                         if (isLetterGrade && numGrade !== null) {
                             formattedResult = `${assign.result} <i>(~${numGrade.toFixed(1)}%)</i>`;
-                        } else {
+                        } else if (hasPercentage) {
                             formattedResult = assign.result;
+                        } else {
+                             formattedResult = assign.result;
                         }
                     }
                     assignRow.innerHTML = `
