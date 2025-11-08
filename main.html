@@ -21,7 +21,7 @@
         }
         body {
             margin: 0;
-            font-family: 'Montserrat', sans-serif; /* Premium Font */
+            font-family: 'Montserrat', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
         }
@@ -29,7 +29,7 @@
             text-align: center;
             padding: 25px 0 15px 0;
             color: var(--secondary-color);
-            font-size: 2.2em; /* Bigger Title */
+            font-size: 2.2em;
             font-weight: 700;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             background-color: var(--widget-background);
@@ -56,7 +56,7 @@
             background-color: var(--side-panel-color);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* More shadow */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
         .logout-btn {
             position: absolute;
@@ -67,6 +67,8 @@
             cursor: pointer;
             transition: color 0.2s, transform 0.2s;
             line-height: 1;
+            text-decoration: none;
+            font-weight: bold;
         }
         .logout-btn:hover {
             color: var(--danger-color);
@@ -93,10 +95,8 @@
         #subject-averages-list { list-style: none; padding: 0; margin: 0; font-size: 0.9em; }
         #subject-averages-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
         #subject-averages-list li:last-child { border-bottom: none; }
-        #subject-averages-list strong { font-weight: 700; } /* Bold subject averages */
-        .btn {
-            display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; text-decoration: none; color: white; transition: background-color 0.2s, transform 0.2s; text-align: center;
-        }
+        #subject-averages-list strong { font-weight: 700; }
+        .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; text-decoration: none; color: white; transition: background-color 0.2s, transform 0.2s; text-align: center; }
         .btn-main-action { background-color: var(--secondary-color); margin-top: 20px; }
         .btn-main-action:hover { background-color: #212f3c; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         .btn-control { background-color: var(--primary-color); }
@@ -113,6 +113,7 @@
         .subject-table tr:last-child td { border-bottom: none; }
         .competency-row td { background-color: #eaf2f8; color: var(--secondary-color); font-weight: bold; font-style: italic; }
         .no-data { color: var(--light-grey); }
+        .result-bold-percent strong { font-weight: 700; } /* Applied to numerical scores in the grid */
         footer { text-align: center; padding: 15px; font-size: 0.8em; color: var(--footer-grey); font-style: italic; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
@@ -130,7 +131,7 @@
 <body>
 
     <header class="site-header">Outil JDLM*</header>
-    <div class="logout-btn" onclick="logoutSession()">&#x2716;</div> <!-- Quit icon -->
+    <a href="login.html" class="logout-btn" onclick="logoutSession()">&#9748;</a>
 
     <main class="main-container">
         <section class="data-section">
@@ -220,6 +221,7 @@
         // ==================================================================
 
         const SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 60 minutes
+        const EXTERNAL_REDIRECT_URL = 'https://student-broken.github.io/';
         let jdlmData, activeTab = 'etape1';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -227,7 +229,8 @@
 
             jdlmData = JSON.parse(localStorage.getItem('jdlmData')) || {};
             if (!jdlmData.nom) {
-                document.getElementById('tab-contents').innerHTML = "<p>Aucune donnée disponible. Veuillez ajouter les données.</p>";
+                // If data is empty but session is valid (user might have cleared data)
+                window.location.href = 'login.html';
                 return;
             }
             loadSettings();
@@ -236,9 +239,8 @@
         });
         
         function logoutSession() {
-            localStorage.removeItem('jdlmData'); // Clear all data
             localStorage.removeItem('sessionStart');
-            window.location.href = 'login.html';
+            window.location.href = 'login.html'; // Redirect to start of local flow
         }
 
         function checkSession() {
@@ -246,18 +248,18 @@
             const now = new Date().getTime();
 
             if (!sessionStart) {
-                localStorage.setItem('sessionStart', now);
-                return true;
-            }
-
-            if (now - parseInt(sessionStart) > SESSION_TIMEOUT_MS) {
-                alert("Votre session a expiré (inactivité ou durée maximale atteinte). Veuillez vous reconnecter.");
-                logoutSession();
+                // Should only happen if user navigates directly without going through login.html
+                // If no session start is found, redirect to external site (or login.html)
+                window.location.href = EXTERNAL_REDIRECT_URL; 
                 return false;
             }
 
-            // Update session time to keep it alive
-            localStorage.setItem('sessionStart', now);
+            if (now - parseInt(sessionStart) > SESSION_TIMEOUT_MS) {
+                localStorage.removeItem('sessionStart');
+                window.location.href = EXTERNAL_REDIRECT_URL;
+                return false;
+            }
+
             return true;
         }
 
@@ -303,7 +305,7 @@
                 jdlmData.settings = { ...jdlmData.settings, unitesMode: e.target.value };
                 localStorage.setItem('jdlmData', JSON.stringify(jdlmData));
                 populateUnitesModal();
-                renderAll(); // Rerender to show updated subject averages
+                renderAll();
                 checkSession();
             });
         }
@@ -322,7 +324,6 @@
             });
             jdlmData.settings.customUnites = customUnites;
             localStorage.setItem('jdlmData', JSON.stringify(jdlmData));
-            // No renderAll here, it's called by the modal's close handler
         }
 
         function getNumericGrade(result) {
@@ -394,7 +395,7 @@
                     const codePrefix = subject.code.substring(0,3);
                     allSubjectAverages[etape][codePrefix] = { name: subjectList[codePrefix] || subject.name, average: average };
                     
-                    const unit = units[codePrefix] ?? 2; // Default to 2 if not explicitly set anywhere
+                    const unit = units[codePrefix] ?? 2;
                     
                     if (average !== null && unit !== null && niveau) {
                         termWeightedSum += average * unit;
@@ -432,15 +433,23 @@
         function renderSidePanel() {
             const averages = calculateAverages();
             const niveau = (jdlmData.settings || {}).niveau;
+
+            // Bug fix: get average for the currently active tab
+            const currentTermAverage = averages.termAverages[activeTab];
+
             const globalAvgEl = document.getElementById('moyenne-generale');
             const termAvgEl = document.getElementById('moyenne-etape');
+
             globalAvgEl.classList.toggle('invalid', !niveau);
             termAvgEl.classList.toggle('invalid', !niveau);
+
             globalAvgEl.innerHTML = !niveau ? 'N/A' : (averages.globalAverage !== null ? `<strong>${averages.globalAverage.toFixed(2)}%</strong>` : '--');
-            termAvgEl.innerHTML = !niveau ? 'N/A' : (averages.termAverages[activeTab] !== null ? `<strong>${averages.termAverages[activeTab].toFixed(2)}%</strong>` : '--');
+            termAvgEl.innerHTML = !niveau ? 'N/A' : (currentTermAverage !== null ? `<strong>${currentTermAverage.toFixed(2)}%</strong>` : '--');
+
             const subjectListEl = document.getElementById('subject-averages-list');
             subjectListEl.innerHTML = '';
             const activeTermSubjects = averages.subjectAverages[activeTab];
+
             if (activeTermSubjects && Object.keys(activeTermSubjects).length > 0) {
                 Object.entries(activeTermSubjects).forEach(([code, subj]) => {
                     const li = document.createElement('li');
@@ -522,7 +531,8 @@
                         if (isLetterGrade && numGrade !== null) {
                             formattedResult = `${assign.result} <i>(~${numGrade.toFixed(1)}%)</i>`;
                         } else if (hasPercentage) {
-                            formattedResult = assign.result;
+                            // Bold the numerical percentage score
+                            formattedResult = `<span class="result-bold-percent"><strong>${assign.result}</strong></span>`;
                         } else {
                              formattedResult = assign.result;
                         }
