@@ -364,28 +364,31 @@
         function calculateSubjectAverage(subject) {
             let totalWeightedGrade = 0;
             let totalCompetencyWeight = 0;
+
             subject.competencies.forEach(comp => {
                 const compWeightMatch = comp.name.match(/\((\d+)%\)/);
                 if (!compWeightMatch) return;
                 const compWeight = parseFloat(compWeightMatch[1]);
+                
                 let totalAssignmentGrade = 0;
                 let totalAssignmentWeight = 0;
+
                 comp.assignments.forEach(assign => {
                     const grade = getNumericGrade(assign.result);
                     const weight = parseFloat(assign.pond);
-                    // THIS IS THE KEY LOGIC: If 'grade' is null (because the result was empty or unparsable),
-                    // this condition is false, and the assignment is correctly skipped.
                     if (grade !== null && !isNaN(weight)) {
                         totalAssignmentGrade += grade * weight;
                         totalAssignmentWeight += weight;
                     }
                 });
+                
                 if (totalAssignmentWeight > 0) {
                     const competencyAverage = totalAssignmentGrade / totalAssignmentWeight;
                     totalWeightedGrade += competencyAverage * compWeight;
-                    totalCompetencyWeight += compWeight;
+                    totalCompetencyWeight += compWeight; // Only add weight if the competency average is valid.
                 }
             });
+
             return totalCompetencyWeight > 0 ? totalWeightedGrade / totalCompetencyWeight : null;
         }
         
