@@ -364,31 +364,28 @@
         function calculateSubjectAverage(subject) {
             let totalWeightedGrade = 0;
             let totalCompetencyWeight = 0;
-
             subject.competencies.forEach(comp => {
                 const compWeightMatch = comp.name.match(/\((\d+)%\)/);
                 if (!compWeightMatch) return;
                 const compWeight = parseFloat(compWeightMatch[1]);
-                
                 let totalAssignmentGrade = 0;
                 let totalAssignmentWeight = 0;
-
                 comp.assignments.forEach(assign => {
                     const grade = getNumericGrade(assign.result);
                     const weight = parseFloat(assign.pond);
+                    // THIS IS THE KEY LOGIC: If 'grade' is null (because the result was empty or unparsable),
+                    // this condition is false, and the assignment is correctly skipped.
                     if (grade !== null && !isNaN(weight)) {
                         totalAssignmentGrade += grade * weight;
                         totalAssignmentWeight += weight;
                     }
                 });
-                
                 if (totalAssignmentWeight > 0) {
                     const competencyAverage = totalAssignmentGrade / totalAssignmentWeight;
                     totalWeightedGrade += competencyAverage * compWeight;
-                    totalCompetencyWeight += compWeight; // Only add weight if the competency average is valid.
+                    totalCompetencyWeight += compWeight;
                 }
             });
-
             return totalCompetencyWeight > 0 ? totalWeightedGrade / totalCompetencyWeight : null;
         }
         
@@ -402,41 +399,41 @@
             return {};
         }
 
-       function calculateSubjectAverage(subject) {
-            let totalWeightedGrade = 0;
-            let totalCompetencyWeight = 0;
-
-            subject.competencies.forEach(comp => {
-                const compWeightMatch = comp.name.match(/\((\d+)%\)/);
-                if (!compWeightMatch) return; // Skip if competency has no weight defined
-
-                const compWeight = parseFloat(compWeightMatch[1]);
-                // FIX: The total weight of the subject MUST include all competencies,
-                // regardless of whether they have grades yet. This line has been moved up.
-                totalCompetencyWeight += compWeight;
-
-                let totalAssignmentGrade = 0;
-                let totalAssignmentWeight = 0;
-
-                comp.assignments.forEach(assign => {
-                    const grade = getNumericGrade(assign.result);
-                    const weight = parseFloat(assign.pond);
-
-                    if (grade !== null && !isNaN(weight)) {
-                        totalAssignmentGrade += grade * weight;
-                        totalAssignmentWeight += weight;
+        function calculateAverages() {
+            const units = getUnits();
+            const niveau = (jdlmData.settings || {}).niveau;
+            let allTermAverages = {};
+            let allSubjectAverages = {};
+            ['etape1', 'etape2', 'etape3'].forEach(etape => {
+                if (!jdlmData[etape]) return;
+                let termWeightedSum = 0;
+                let termUnitSum = 0;
+                allSubjectAverages[etape] = {};
+                jdlmData[etape].forEach(subject => {
+                    const average = calculateSubjectAverage(subject);
+                    const codePrefix = subject.code.substring(0,3);
+                    allSubjectAverages[etape][codePrefix] = { name: subjectList[codePrefix] || subject.name, average: average };
+                    const unit = units[codePrefix] || (mode === 'perso' ? 1 : null);
+                    if (average !== null && unit !== null && niveau) {
+                        termWeightedSum += average * unit;
+                        termUnitSum += unit;
                     }
                 });
-
-                // Only add to the final score if there are graded assignments in this competency.
-                if (totalAssignmentWeight > 0) {
-                    const competencyAverage = totalAssignmentGrade / totalAssignmentWeight;
-                    totalWeightedGrade += competencyAverage * compWeight;
+                allTermAverages[etape] = termUnitSum > 0 ? termWeightedSum / termUnitSum : null;
+            });
+            let globalWeightedSum = 0;
+            let globalTermCount = 0;
+            Object.values(allTermAverages).forEach(avg => {
+                if (avg !== null) {
+                    globalWeightedSum += avg;
+                    globalTermCount++;
                 }
             });
-
-            // The final average is the total score divided by the total possible weight (usually 100).
-            return totalCompetencyWeight > 0 ? totalWeightedGrade / totalCompetencyWeight : null;
+            return {
+                subjectAverages: allSubjectAverages,
+                termAverages: allTermAverages,
+                globalAverage: globalTermCount > 0 ? globalWeightedSum / globalTermCount : null
+            };
         }
         
         function renderAll() {
