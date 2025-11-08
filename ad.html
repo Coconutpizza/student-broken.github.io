@@ -442,7 +442,7 @@ function showLinkvertisePopup() {
             clearInterval(countdownInterval);
             linkvertiseLink.classList.add("active");
             linkvertiseLink.style.cursor = "pointer";
-            document.getElementById("countdown").textContent = "Link is now active!";
+            document.getElementById("countdown").textContent = "Link is now active";
         } else {
             document.getElementById("countdown").textContent = `Link available in ${countdown} seconds...`;
         }
@@ -451,7 +451,7 @@ function showLinkvertisePopup() {
     linkvertiseLink.onclick = (e) => {
         if (!linkvertiseLink.classList.contains('active')) {
             e.preventDefault();
-            alert("Please wait for the countdown to finish!");
+            alert("Please wait");
             return false;
         }
     };
