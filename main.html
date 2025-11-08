@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de Bord - Outil JDLM</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Google Font for Premium Title Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* ================================================================== */
-        /* BASE & THEME */
-        /* ================================================================== */
         :root {
             --primary-color: #3498db;
             --secondary-color: #2c3e50;
@@ -20,12 +19,10 @@
             --light-grey: #bdc3c7;
             --footer-grey: #7f8c8d;
             --danger-color: #e74c3c;
-            --premium-font: "Momo Trust Display", "Georgia", serif;
-            --normal-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         body {
             margin: 0;
-            font-family: var(--normal-font);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
         }
@@ -33,35 +30,11 @@
             text-align: center;
             padding: 20px 0;
             color: var(--secondary-color);
-            font-size: 1.5em;
-            font-weight: bold;
-            position: relative;
+            font-size: 2.2em; /* Bigger title */
+            font-weight: 700;
+            font-family: 'Playfair Display', serif; /* Premium Font */
+            letter-spacing: 0.05em;
         }
-        .site-header-title {
-            font-size: 2.5em;
-            line-height: 1;
-        }
-        .site-header-title .jdlm {
-            font-family: var(--premium-font);
-            font-size: 1.2em; /* Bigger JDLM */
-            font-weight: 900;
-        }
-        .home-arrow {
-            position: absolute;
-            top: 25px;
-            left: 25px;
-            font-size: 2em;
-            color: var(--secondary-color);
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-        .home-arrow:hover {
-            transform: scale(1.1);
-        }
-
-        /* ================================================================== */
-        /* LAYOUT & WIDGETS */
-        /* ================================================================== */
         .main-container {
             display: flex;
             max-width: 1600px;
@@ -80,8 +53,7 @@
             background-color: var(--side-panel-color);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1); /* Premium Shadow */
-            transition: box-shadow 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15); /* Soft shadow */
         }
         .moyenne-widgets {
             display: flex;
@@ -112,15 +84,49 @@
         .control-group {
             margin-bottom: 20px;
         }
-        
-        /* Buttons, Selects, Inputs */
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .control-group select, .control-group .btn {
+            width: 100%;
+        }
         select {
             padding: 10px;
             border-radius: 8px;
             border: 1px solid var(--light-grey);
             background-color: white;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-            width: 100%;
+            transition: box-shadow 0.2s;
+        }
+        select:focus {
+            box-shadow: 0 0 0 2px var(--primary-color);
+            outline: none;
+        }
+        .subject-averages {
+            margin-top: 20px;
+        }
+        .subject-averages h4 {
+            margin-top: 0;
+            color: var(--secondary-color);
+            border-bottom: 1px solid var(--light-grey);
+            padding-bottom: 5px;
+        }
+        #subject-averages-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9em;
+        }
+        #subject-averages-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        #subject-averages-list li:last-child {
+            border-bottom: none;
         }
         .btn {
             display: block;
@@ -133,12 +139,13 @@
             cursor: pointer;
             text-decoration: none;
             color: white;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .btn:hover {
             transform: translateY(-1px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
         }
         .btn-main-action {
             background-color: var(--secondary-color);
@@ -150,69 +157,25 @@
         .btn-control {
             background-color: var(--primary-color);
         }
-        .btn-control:hover {
-            background-color: #2980b9;
-        }
-        
-        /* Data Table Styling */
-        .subject-table {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-        }
-        .subject-table th {
-            background-color: var(--secondary-color);
-        }
-        .subject-table td strong {
-            font-weight: 700; /* Bold percentages */
-        }
-        .subject-table td i {
-            font-style: normal;
-            font-weight: 500;
-            color: #7f8c8d;
-        }
-        
-        /* Modal Animations & Styling */
-        .modal-overlay {
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            transform: scale(0.9);
-            transition: transform 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-        }
-        
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 0.8em;
-            color: var(--footer-grey);
-            font-style: italic;
-        }
-        
-        /* Reused styles from previous versions for clarity */
         .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 1em; font-weight: bold; color: var(--light-grey); position: relative; }
         .tab-btn.active { color: var(--primary-color); }
         .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background-color: var(--primary-color); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .subject-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background: var(--widget-background); border-radius: 8px; overflow: hidden; }
+        .subject-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background: var(--widget-background); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
         .subject-table th, .subject-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: top; }
         .subject-table th { background-color: var(--secondary-color); color: white; font-size: 14px; }
         .subject-table td { font-size: 13px; }
         .subject-table tr:last-child td { border-bottom: none; }
         .competency-row td { background-color: #eaf2f8; color: var(--secondary-color); font-weight: bold; font-style: italic; }
         .no-data { color: var(--light-grey); }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000;}
+        .grade-percentage { font-weight: bold; } /* New style for bold percentage */
+        footer { text-align: center; padding: 15px; font-size: 0.8em; color: var(--footer-grey); font-style: italic; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background-color: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; max-width: 90%; width: 450px; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.8em; cursor: pointer; color: var(--light-grey); }
         #unites-list { max-height: 300px; overflow-y: auto; margin-top: 15px; }
         .unite-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-radius: 4px; }
@@ -220,14 +183,24 @@
         .unite-item label { flex: 1; }
         .unite-item input { width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-grey); border-radius: 4px; }
         .unite-item span { width: 60px; text-align: center; font-weight: bold; }
+        .logout-arrow {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            font-size: 2em;
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .logout-arrow:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
 
-    <header class="site-header">
-        <a href="index.html" class="home-arrow">←</a>
-        <div class="site-header-title">Outil <span class="jdlm">JDLM</span>*</div>
-    </header>
+    <a href="index.html" class="logout-arrow">←</a>
+    <header class="site-header">Outil JDLM*</header>
 
     <main class="main-container">
         <section class="data-section">
@@ -318,36 +291,35 @@
 
         let jdlmData, activeTab = 'etape1';
 
-        // --- CORE FUNCTIONALITY ---
-        
-        function autoLogoutCheck() {
-            const lastActive = localStorage.getItem('jdlm_last_active');
-            const now = Date.now();
-            
-            // Check for 1 hour (3600000 milliseconds)
-            if (lastActive && (now - parseInt(lastActive, 10)) > 3600000) {
-                localStorage.removeItem('jdlmData');
-                localStorage.removeItem('jdlm_last_active');
-                alert("Session expirée. Veuillez vous reconnecter.");
-                window.location.href = 'index.html';
-            }
-            localStorage.setItem('jdlm_last_active', now);
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            autoLogoutCheck();
+            checkLogoutTimer();
             jdlmData = JSON.parse(localStorage.getItem('jdlmData')) || {};
             if (!jdlmData.nom) {
                 document.getElementById('tab-contents').innerHTML = "<p>Aucune donnée disponible. Veuillez ajouter les données.</p>";
                 return;
             }
+            // Update timestamp for active session
+            localStorage.setItem('jdlmLastActive', Date.now().toString());
             loadSettings();
             setupEventListeners();
             renderAll();
-            
-            // Set a timer to check every 5 minutes (for a soft, non-intrusive check)
-            setInterval(autoLogoutCheck, 300000); 
         });
+
+        function checkLogoutTimer() {
+            const lastActiveTime = localStorage.getItem('jdlmLastActive');
+            const ONE_HOUR = 60 * 60 * 1000;
+            if (lastActiveTime && (Date.now() - parseInt(lastActiveTime)) > ONE_HOUR) {
+                // Optionally clear data on timeout, but per request, just redirect
+                window.location.href = 'index.html';
+            }
+            // Start a recurring check (e.g., every 5 minutes)
+            setInterval(() => {
+                const checkTime = localStorage.getItem('jdlmLastActive');
+                 if (checkTime && (Date.now() - parseInt(checkTime)) > ONE_HOUR) {
+                    window.location.href = 'index.html';
+                }
+            }, 5 * 60 * 1000);
+        }
 
         function setupEventListeners() {
             document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -370,31 +342,22 @@
                 populateUnitesModal();
                 unitesModal.classList.add('active');
             });
-            // Update on modal CLOSE (via X or click outside)
             document.getElementById('close-unites-modal').addEventListener('click', () => {
                 saveCustomUnits();
                 unitesModal.classList.remove('active');
-                renderAll(); // RENDER on close
+                renderAll(); // Forced update after closing modal
             });
             unitesModal.addEventListener('click', (e) => {
                 if(e.target === unitesModal) {
                     saveCustomUnits();
                     unitesModal.classList.remove('active');
-                    renderAll(); // RENDER on close
-                }
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && unitesModal.classList.contains('active')) {
-                    saveCustomUnits();
-                    unitesModal.classList.remove('active');
-                    renderAll(); // RENDER on close
+                    renderAll(); // Forced update after clicking overlay
                 }
             });
             document.getElementById('unites-mode').addEventListener('change', (e) => {
                 jdlmData.settings = { ...jdlmData.settings, unitesMode: e.target.value };
                 localStorage.setItem('jdlmData', JSON.stringify(jdlmData));
                 populateUnitesModal();
-                renderAll(); // RENDER on mode change
             });
         }
         
@@ -483,7 +446,7 @@
                     const codePrefix = subject.code.substring(0,3);
                     allSubjectAverages[etape][codePrefix] = { name: subjectList[codePrefix] || subject.name, average: average };
                     
-                    const unit = units[codePrefix] ?? (mode === 'perso' ? 1 : 2);
+                    const unit = units[codePrefix] ?? (mode === 'perso' ? 1 : 2); // Default unit weight of 2
                     
                     if (average !== null && unit !== null && niveau) {
                         termWeightedSum += average * unit;
@@ -525,15 +488,15 @@
             const termAvgEl = document.getElementById('moyenne-etape');
             globalAvgEl.classList.toggle('invalid', !niveau);
             termAvgEl.classList.toggle('invalid', !niveau);
-            globalAvgEl.textContent = !niveau ? 'N/A' : (averages.globalAverage !== null ? averages.globalAverage.toFixed(2) + '%' : '--');
-            termAvgEl.textContent = !niveau ? 'N/A' : (averages.termAverages[activeTab] !== null ? averages.termAverages[activeTab].toFixed(2) + '%' : '--');
+            globalAvgEl.innerHTML = !niveau ? 'N/A' : (averages.globalAverage !== null ? `<span class="grade-percentage">${averages.globalAverage.toFixed(2)}%</span>` : '--');
+            termAvgEl.innerHTML = !niveau ? 'N/A' : (averages.termAverages[activeTab] !== null ? `<span class="grade-percentage">${averages.termAverages[activeTab].toFixed(2)}%</span>` : '--');
             const subjectListEl = document.getElementById('subject-averages-list');
             subjectListEl.innerHTML = '';
             const activeTermSubjects = averages.subjectAverages[activeTab];
             if (activeTermSubjects && Object.keys(activeTermSubjects).length > 0) {
                 Object.entries(activeTermSubjects).forEach(([code, subj]) => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<span>${subj.name}</span><strong>${subj.average !== null ? subj.average.toFixed(2) + '%' : 'N/A'}</strong>`;
+                    li.innerHTML = `<span>${subj.name}</span><strong>${subj.average !== null ? `<span class="grade-percentage">${subj.average.toFixed(2)}%</span>` : 'N/A'}</strong>`;
                     subjectListEl.appendChild(li);
                 });
             } else {
@@ -607,11 +570,15 @@
                     let formattedResult = '<span class="no-data">-</span>';
                     if (assign.result) {
                         const isLetterGrade = !!gradeMap[assign.result.trim()];
+                        const isSimplePercentage = assign.result.includes('%') && !assign.result.includes('/');
+                        
                         if (isLetterGrade && numGrade !== null) {
-                            formattedResult = `<strong>${assign.result}</strong> <i>(~${numGrade.toFixed(1)}%)</i>`;
+                            formattedResult = `${assign.result} <i>(~<span class="grade-percentage">${numGrade.toFixed(1)}%</span>)</i>`;
+                        } else if (isSimplePercentage || assign.result.match(/(\d+[,.]?\d*)\s*\/\s*(\d+[,.]?\d*)/)) {
+                            // Already a score/percentage, only bold the number part.
+                            formattedResult = assign.result.replace(/(\d+[,.]?\d*\s*\/.*|(\d+[,.]?\d*\s*%))/g, (match) => `<span class="grade-percentage">${match}</span>`);
                         } else {
-                            // Bold the numerical result for better viewing
-                            formattedResult = `<strong>${assign.result}</strong>`;
+                            formattedResult = assign.result;
                         }
                     }
                     assignRow.innerHTML = `
