@@ -6,6 +6,11 @@
     <title>Ajouter des Données - Outil JDLM</title>
     <link rel="icon" href="https://raw.githubusercontent.com/Student-broken/student-broken.github.io/refs/heads/main/favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
         :root {
             --primary-color: #2980b9; 
@@ -310,16 +315,6 @@
             line-height: 1;
         }
 
-        footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 0.8em;
-            color: var(--footer-grey);
-            font-style: italic;
-            border-top: 1px solid #eee;
-            margin-top: auto;
-        }
-
         .status-message {
             padding: 12px;
             border-radius: 8px;
@@ -339,6 +334,16 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
             display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.8em;
+            color: var(--footer-grey);
+            font-style: italic;
+            border-top: 1px solid #eee;
+            margin-top: auto;
         }
     </style>
 </head>
@@ -408,9 +413,29 @@
     </div>
 
     <footer>*jauge de la moyenne</footer>
-                
 
     <script>
+        // ========================================
+        // FIREBASE CONFIGURATION
+        // ========================================
+        // REPLACE THIS with your Firebase config from Step 2!
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ========================================
+        // GRADE AND UNIT CONSTANTS
+        // ========================================
         const gradeMap = {
             'A+': {min: 95, max: 100}, 'A': {min: 90, max: 94}, 'A-': {min: 85, max: 89},
             'B+': {min: 80, max: 84}, 'B': {min: 75, max: 79}, 'B-': {min: 70, max: 74},
@@ -423,10 +448,23 @@
             sec5: { 'ART': 2, 'MUS': 2, 'DRM': 2, 'CAT': 4, 'FRA': 6, 'ELA': 6, 'EESL': 6, 'ESL': 4, 'MAT': 6, 'CST': 4, 'MED': 4, 'PSY': 4, 'ENT': 4, 'FIN': 4, 'CHI': 4, 'PHY': 4, 'MON': 2, 'HQC': 4, 'CCQ': 2, 'EPS': 2 }
         };
 
+        // ========================================
+        // UI ELEMENTS
+        // ========================================
         const openModalBtn = document.getElementById('open-modal-btn');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const tutorialModal = document.getElementById('tutorial-modal');
-        
+        const shareCheckbox = document.getElementById('share-checkbox');
+        const displayNameSection = document.getElementById('display-name-section');
+        const displayNameInput = document.getElementById('display-name');
+        const submitBtn = document.getElementById('submit-btn');
+        const dataForm = document.getElementById('data-form');
+        const rawTextArea = document.getElementById('raw-text');
+        const statusMessage = document.getElementById('status-message');
+
+        // ========================================
+        // MODAL CONTROLS
+        // ========================================
         const openModal = () => tutorialModal.classList.add('active');
         const closeModal = () => tutorialModal.classList.remove('active');
         
@@ -435,18 +473,9 @@
         tutorialModal.addEventListener('click', (e) => { if (e.target === tutorialModal) closeModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-        const shareCheckbox = document.getElementById('share-checkbox');
-        const displayNameSection = document.getElementById('display-name-section');
-        const displayNameInput = document.getElementById('display-name');
-        
         shareCheckbox.addEventListener('change', () => {
             displayNameSection.classList.toggle('active', shareCheckbox.checked);
         });
-
-        const submitBtn = document.getElementById('submit-btn');
-        const dataForm = document.getElementById('data-form');
-        const rawTextArea = document.getElementById('raw-text');
-        const statusMessage = document.getElementById('status-message');
 
         function showStatus(message, isError = false) {
             statusMessage.textContent = message;
@@ -463,6 +492,9 @@
         checkTextarea();
         rawTextArea.addEventListener('input', checkTextarea);
 
+        // ========================================
+        // FORM SUBMISSION
+        // ========================================
         dataForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const rawText = rawTextArea.value;
@@ -477,7 +509,7 @@
             try {
                 const parsedResult = parsePortalData(rawText);
                 if (!parsedResult.nom || !parsedResult.etapeData) {
-                    showStatus("Erreur lors de l'analyse des données. Le nom ou le numéro d'étape n'a pas pu être trouvé.", true);
+                    showStatus("Erreur lors de l'analyse des données. Vérifiez le format.", true);
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Enregistrer et continuer';
                     return;
@@ -501,9 +533,9 @@
                 
                 if (shareCheckbox.checked) {
                     await updateLeaderboard(updatedData);
-                    showStatus('Données enregistrées et partagées au classement!');
+                    showStatus('✓ Données enregistrées et partagées au classement!');
                 } else {
-                    showStatus('Données enregistrées localement!');
+                    showStatus('✓ Données enregistrées localement!');
                 }
                 
                 setTimeout(() => {
@@ -512,12 +544,15 @@
                 
             } catch (error) {
                 console.error('Error saving data:', error);
-                showStatus('Erreur lors de l\'enregistrement: ' + error.message, true);
+                showStatus('Erreur: ' + error.message, true);
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Enregistrer et continuer';
             }
         });
 
+        // ========================================
+        // FIREBASE: UPDATE LEADERBOARD
+        // ========================================
         async function updateLeaderboard(userData) {
             try {
                 const averages = calculateAverages(userData);
@@ -531,19 +566,19 @@
                     lastUpdated: new Date().toISOString()
                 };
                 
-                await window.storage.set(
-                    `leaderboard:${userData.userId}`,
-                    JSON.stringify(leaderboardEntry),
-                    true
-                );
+                // Save to Firebase
+                await database.ref('leaderboard/' + userData.userId).set(leaderboardEntry);
                 
-                console.log('Leaderboard updated successfully');
+                console.log('✓ Leaderboard updated in Firebase');
             } catch (error) {
                 console.error('Error updating leaderboard:', error);
-                throw error;
+                throw new Error('Impossible de mettre à jour le classement');
             }
         }
 
+        // ========================================
+        // CALCULATION FUNCTIONS
+        // ========================================
         function getNumericGrade(result) {
             if (!result) return null;
             const trimmedResult = result.trim();
@@ -647,6 +682,9 @@
             };
         }
 
+        // ========================================
+        // PARSING FUNCTION
+        // ========================================
         function parsePortalData(text) {
             const nameMatch = text.match(/Photo\s*\n(.+)/);
             const semesterMatch = text.match(/Classe\s*\n\s*(\d)/);
